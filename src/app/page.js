@@ -8,8 +8,41 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 export default function HomePage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  const handleDelete = async (recipe) => {
+    if (deletingId) return;
+    if (typeof window !== 'undefined' && !window.confirm(`Delete "${recipe.title}" permanently?`)) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    const slugOrId = recipe.slug || recipe._id;
+    setDeletingId(recipe._id);
+    try {
+      const res = await fetch(`/api/recipe/${slugOrId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        router.push('/login');
+        return;
+      }
+      if (res.ok) {
+        setRecipes((prev) => prev.filter((r) => r._id !== recipe._id));
+      }
+    } catch (err) {
+      console.error('Delete failed:', err);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const fetchRecipes = useCallback(async (isRetry = false) => {
     const token = localStorage.getItem('token');
@@ -74,7 +107,18 @@ export default function HomePage() {
             <div className="col-md-4 mb-4" key={recipe._id}>
               <div className="card h-100 shadow-sm">
                 <div className="card-body">
-                  <span className="badge bg-primary mb-2">{recipe.category}</span>
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <span className="badge bg-primary">{recipe.category}</span>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger"
+                      title="Delete recipe"
+                      disabled={deletingId === recipe._id}
+                      onClick={() => handleDelete(recipe)}
+                    >
+                      {deletingId === recipe._id ? '…' : 'Delete'}
+                    </button>
+                  </div>
                   <h5 className="card-title">{recipe.title}</h5>
                   <p className="card-text text-muted">
                     By: {recipe.userId?.name || 'Anonymous'}

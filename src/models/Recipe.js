@@ -8,7 +8,7 @@ const RecipeSchema = new mongoose.Schema({
   },
   slug: {
     type: String,
-    unique: true,
+    required: true,
     trim: true,
   },
   category: {
@@ -30,6 +30,9 @@ const RecipeSchema = new mongoose.Schema({
     required: true,
   },
 }, { timestamps: true });
+
+// Per-user unique slug: same slug allowed for different users
+RecipeSchema.index({ userId: 1, slug: 1 }, { unique: true });
 
 // Export as a function to avoid Turbopack import issues
 export function getRecipeModel() {

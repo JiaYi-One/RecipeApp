@@ -1,6 +1,7 @@
 import dbConnect from '@/lib/dbConnect';
 import { getRecipeModel } from '@/models/Recipe';
 import { getUserModel } from '@/models/User';
+import { generateUniqueSlug } from '@/lib/slugify';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 
@@ -49,17 +50,10 @@ export async function POST(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const { title, category, ingredients, instructions } = await req.json();
-
-    // Create URL-friendly slug; timestamp suffix ensures uniqueness (e.g. two "Egg Tart" → egg-tart-1234, egg-tart-5678)
-    const createSlug = (text) => {
-      return text
-        .toLowerCase()
-        .replace(/[^\w ]+/g, '')
-        .replace(/ +/g, '-');
-    };
-    const slug = `${createSlug(title)}-${Date.now().toString().slice(-4)}`;
-
     const Recipe = getRecipeModel();
+    
+    const slug = await generateUniqueSlug(Recipe, title, decoded.userId);
+
     const newRecipe = await Recipe.create({
       title,
       slug,
