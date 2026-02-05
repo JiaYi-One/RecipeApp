@@ -55,7 +55,9 @@ export default function HomePage() {
         return;
       }
       if (res.ok) {
-        setRecipes((prev) => prev.filter((r) => r._id !== recipe._id));
+        const updatedRecipes = recipes.filter((r) => r._id !== recipe._id);
+        setRecipes(updatedRecipes);
+        sessionStorage.setItem('allRecipes', JSON.stringify(updatedRecipes));
         setDeleteSuccess(true);
         setTimeout(() => setDeleteSuccess(false), 3000);
       }
@@ -88,7 +90,9 @@ export default function HomePage() {
         setLoading(false);
         return;
       }
-      setRecipes(Array.isArray(data) ? data : []);
+      const recipesData = Array.isArray(data) ? data : [];
+      setRecipes(recipesData);
+      sessionStorage.setItem('allRecipes', JSON.stringify(recipesData));
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch:', error);
@@ -240,7 +244,10 @@ export default function HomePage() {
                   </ul>
                 </div>
                 <div className="card-footer bg-white border-top-0">
-                  <Link href={`/recipe/${recipe.slug || recipe._id}`} className="btn btn-outline-primary w-100">
+                  <Link 
+                    href={`/recipe/${recipe.slug || recipe._id}`} 
+                    className="btn btn-outline-primary w-100"
+                  >
                     View Full Recipe
                   </Link>
                 </div>
