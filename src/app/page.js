@@ -10,6 +10,7 @@ export default function HomePage() {
   const [deletingId, setDeletingId] = useState(null);
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -52,6 +53,8 @@ export default function HomePage() {
       }
       if (res.ok) {
         setRecipes((prev) => prev.filter((r) => r._id !== recipe._id));
+        setDeleteSuccess(true);
+        setTimeout(() => setDeleteSuccess(false), 3000);
       }
     } catch (err) {
       console.error('Delete failed:', err);
@@ -130,6 +133,14 @@ export default function HomePage() {
     <>
       <Navbar />
       <div className="container mt-4">
+        {deleteSuccess && (
+          <div className="alert alert-success alert-dismissible fade show" role="alert">
+            <i className="bi bi-check-circle me-2"></i>
+            Recipe deleted successfully!
+            <button type="button" className="btn-close" onClick={() => setDeleteSuccess(false)}></button>
+          </div>
+        )}
+        
         <div className="d-flex justify-content-end mb-3">
           <a href="/recipe/upload" className="btn btn-success">Add New Recipe</a>
         </div>

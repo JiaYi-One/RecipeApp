@@ -106,7 +106,10 @@ export default function RecipeDetailPage() {
         return;
       }
 
-      router.push('/');
+      setSuccessMessage('Recipe deleted successfully!');
+      setTimeout(() => {
+        router.push('/');
+      }, 1500);
     } catch (err) {
       setError('Failed to delete recipe');
     } finally {
@@ -246,24 +249,37 @@ export default function RecipeDetailPage() {
                 <h1 className="card-title mb-2">{recipe.title}</h1>
                 <p className="text-muted mb-0">By: {recipe.userId?.name || 'Anonymous'}</p>
               </div>
-              <div className="ms-3 d-flex flex-column flex-md-row gap-2">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={handleEditToggle}
-                  disabled={deleting}
-                >
-                  {isEditing ? 'Cancel Edit' : 'Edit Recipe'}
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-danger"
-                  onClick={handleDelete}
-                  disabled={deleting}
-                >
-                  {deleting ? 'Deleting...' : 'Delete Recipe'}
-                </button>
-              </div>
+              {!isEditing && (
+                <div className="ms-3 d-flex flex-column flex-md-row gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={handleEditToggle}
+                    disabled={deleting}
+                  >
+                    <i className="bi bi-pencil-square me-1"></i>
+                    Edit 
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-trash me-1"></i>
+                        Delete 
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
 
             {isEditing ? (
@@ -312,26 +328,51 @@ export default function RecipeDetailPage() {
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
+                <div className="d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={handleEditToggle}
+                    disabled={saving}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                </div>
               </form>
             ) : (
               <>
                 <h5 className="mt-4">Ingredients</h5>
-                <ul className="list-group list-group-flush mb-4">
-                  {recipe.ingredients?.map((ing, i) => (
-                    <li key={i} className="list-group-item">{ing}</li>
-                  ))}
-                </ul>
+                <div className="card bg-light p-3 mb-4">
+                  <ul className="list-unstyled mb-0">
+                    {recipe.ingredients?.map((ing, i) => (
+                      <li key={i}>{ing}</li>
+                    ))}
+                  </ul>
+                </div>
 
                 <h5 className="mt-4">Instructions</h5>
                 <div className="card bg-light p-3">
-                  <p className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>{recipe.instructions}</p>
+                  <ol className="mb-0">
+                    {recipe.instructions?.split('\n').filter(step => step.trim()).map((step, i) => (
+                      <li key={i}>{step}</li>
+                    ))}
+                  </ol>
                 </div>
               </>
             )}
