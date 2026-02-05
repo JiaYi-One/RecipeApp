@@ -11,8 +11,11 @@ export default function HomePage() {
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const pathname = usePathname();
+
+  const recipesPerPage = 9;
 
   const categories = ['All', 'Cake', 'Dessert', 'Drink', 'Main', 'Other'];
 
@@ -127,6 +130,15 @@ export default function HomePage() {
     return matchesSearch && matchesCategory;
   });
 
+  const totalPages = Math.ceil(filteredRecipes.length / recipesPerPage);
+  const indexOfLastRecipe = currentPage * recipesPerPage;
+  const indexOfFirstRecipe = indexOfLastRecipe - recipesPerPage;
+  const currentRecipes = filteredRecipes.slice(indexOfFirstRecipe, indexOfLastRecipe);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, selectedCategory]);
+
   if (loading) return <div className="container mt-5 text-center">Loading Recipes...</div>;
 
   return (
@@ -194,7 +206,7 @@ export default function HomePage() {
               : 'No recipes match your search. Try different keywords or filters.'}
           </p>
         ) : (
-          filteredRecipes.map((recipe) => (
+          currentRecipes.map((recipe) => (
             <div className="col-md-4 mb-4" key={recipe._id}>
               <div className="card h-100 shadow-sm">
                 <div className="card-body">
@@ -237,6 +249,45 @@ export default function HomePage() {
           ))
         )}
         </div>
+
+        {filteredRecipes.length > recipesPerPage && (
+          <div className="d-flex justify-content-center mt-4">
+            <nav>
+              <ul className="pagination">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <button 
+                    className="page-link" 
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Previous
+                  </button>
+                </li>
+                
+                {[...Array(totalPages)].map((_, index) => (
+                  <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
+                    <button 
+                      className="page-link" 
+                      onClick={() => setCurrentPage(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  </li>
+                ))}
+                
+                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                  <button 
+                    className="page-link" 
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        )}
       </div>
     </>
   );
