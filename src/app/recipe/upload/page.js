@@ -50,6 +50,7 @@ export default function UploadRecipe() {
     if (res.ok) {
       setSuccess(true);
       setMessage('Recipe uploaded successfully!');
+      sessionStorage.removeItem('allRecipes');
       setTimeout(() => router.push('/'), 2000);
     } else {
       setSuccess(false);

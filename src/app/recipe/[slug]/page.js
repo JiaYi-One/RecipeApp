@@ -129,7 +129,8 @@ export default function RecipeDetailPage() {
         return;
       }
 
-      setSuccessMessage('Recipe deleted successfully!');
+      sessionStorage.removeItem('allRecipes');
+      setSuccessMessage('Recipe deleted successfully! Redirecting...');
       setTimeout(() => {
         router.push('/');
       }, 1500);
