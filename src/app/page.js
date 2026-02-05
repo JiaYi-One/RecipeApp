@@ -111,6 +111,21 @@ export default function HomePage() {
       router.push('/login');
       return;
     }
+
+    const cachedRecipes = sessionStorage.getItem('allRecipes');
+    if (cachedRecipes) {
+      try {
+        const parsed = JSON.parse(cachedRecipes);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setRecipes(parsed);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
+    }
+
     setLoading(true);
     fetchRecipes();
   }, [pathname, router, fetchRecipes]);
