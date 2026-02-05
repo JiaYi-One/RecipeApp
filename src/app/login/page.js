@@ -6,6 +6,7 @@ import Link from 'next/link';
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -17,22 +18,30 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
+    setLoading(true);
+    setMessage('');
 
-    const data = await res.json();
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    if (res.ok) {
-      localStorage.setItem('token', data.token);
-      //setMessage('Login Successful! Redirecting...');
-      setTimeout(() => {
-        router.push('/'); 
-      }, 1000);
-    } else {
-      setMessage(data.message || 'Login failed');
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        setTimeout(() => {
+          router.push('/'); 
+        }, 1000);
+      } else {
+        setMessage(data.message || 'Login failed');
+        setLoading(false);
+      }
+    } catch (error) {
+      setMessage('Login failed. Please try again.');
+      setLoading(false);
     }
   };
 
@@ -67,7 +76,16 @@ export default function LoginPage() {
                 required 
               />
             </div>
-            <button type="submit" className="btn btn-primary w-100">Login</button>
+            <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  Logging in...
+                </>
+              ) : (
+                'Login'
+              )}
+            </button>
           </form>
           <div className="text-center mt-3">
             <small>Don't have an account? <Link href="/register" className="text-decoration-none fw-bold">Register here</Link></small>
