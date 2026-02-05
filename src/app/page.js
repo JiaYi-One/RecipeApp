@@ -3,14 +3,30 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function HomePage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const router = useRouter();
   const pathname = usePathname();
+
+  const categories = ['All', 'Cake', 'Dessert', 'Drink', 'Main', 'Other'];
+
+  const getCategoryColor = (category) => {
+    const colors = {
+      'All': 'secondary',
+      'Cake': 'danger',
+      'Dessert': 'warning',
+      'Drink': 'info',
+      'Main': 'success',
+      'Other': 'dark'
+    };
+    const categoryKey = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+    return colors[categoryKey] || 'dark';
+  };
 
   const handleDelete = async (recipe) => {
     if (deletingId) return;
@@ -57,7 +73,6 @@ export default function HomePage() {
         router.push('/login');
         return;
       }
-      // Server/DB may not be ready right after npm run dev — retry once
       if (res.status === 500 && !isRetry) {
         setTimeout(() => fetchRecipes(true), 1500);
         return;
@@ -90,6 +105,25 @@ export default function HomePage() {
     fetchRecipes();
   }, [pathname, router, fetchRecipes]);
 
+  const filteredRecipes = recipes.filter((recipe) => {
+    const matchesSearch = recipe.title.toLowerCase().includes(searchText.toLowerCase());
+    
+    const standardCategories = ['cake', 'dessert', 'drink', 'main'];
+    const recipeCategory = recipe.category.toLowerCase();
+    const isStandardCategory = standardCategories.includes(recipeCategory);
+    
+    let matchesCategory = false;
+    if (selectedCategory === 'All') {
+      matchesCategory = true;
+    } else if (selectedCategory === 'Other') {
+      matchesCategory = !isStandardCategory;
+    } else {
+      matchesCategory = recipeCategory === selectedCategory.toLowerCase();
+    }
+    
+    return matchesSearch && matchesCategory;
+  });
+
   if (loading) return <div className="container mt-5 text-center">Loading Recipes...</div>;
 
   return (
@@ -97,18 +131,64 @@ export default function HomePage() {
       <Navbar />
       <div className="container mt-4">
         <div className="d-flex justify-content-end mb-3">
-          <a href="/recipe/upload" className="btn btn-success">Share New Recipe</a>
+          <a href="/recipe/upload" className="btn btn-success">Add New Recipe</a>
         </div>
+
+        <div className="mb-4">
+          <div className="row justify-content-center">
+            <div className="col-lg-6 col-md-8 col-12">
+              <div className="input-group mb-3">
+                <span className="input-group-text">
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search recipes by title..."
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                />
+                {searchText && (
+                  <button 
+                    className="btn btn-outline-secondary" 
+                    type="button"
+                    onClick={() => setSearchText('')}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="d-flex gap-2 flex-wrap justify-content-center">
+            {categories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                className={`btn btn-sm ${selectedCategory === category ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="row">
-        {recipes.length === 0 ? (
-          <p className="text-center">No recipes found. Be the first to share!</p>
+        {filteredRecipes.length === 0 ? (
+          <p className="text-center">
+            {recipes.length === 0 
+              ? 'No recipes found. Add your first recipe now!' 
+              : 'No recipes match your search. Try different keywords or filters.'}
+          </p>
         ) : (
-          recipes.map((recipe) => (
+          filteredRecipes.map((recipe) => (
             <div className="col-md-4 mb-4" key={recipe._id}>
               <div className="card h-100 shadow-sm">
                 <div className="card-body">
                   <div className="d-flex justify-content-between align-items-start mb-2">
-                    <span className="badge bg-primary">{recipe.category}</span>
+                    <span className={`badge bg-${getCategoryColor(recipe.category)}`}>{recipe.category}</span>
                     <button
                       type="button"
                       className="btn btn-sm btn-outline-danger"
@@ -116,7 +196,11 @@ export default function HomePage() {
                       disabled={deletingId === recipe._id}
                       onClick={() => handleDelete(recipe)}
                     >
-                      {deletingId === recipe._id ? '…' : 'Delete'}
+                      {deletingId === recipe._id ? (
+                        <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                      ) : (
+                        <i className="bi bi-trash"></i>
+                      )}
                     </button>
                   </div>
                   <h5 className="card-title">{recipe.title}</h5>

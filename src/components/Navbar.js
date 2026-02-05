@@ -14,7 +14,7 @@ export default function Navbar() {
     <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
       <div className="container">
         <Link href="/" className="navbar-brand fw-bold">
-          MyRecipeDairy 🍰
+          My Recipe
         </Link>
         
         <button 

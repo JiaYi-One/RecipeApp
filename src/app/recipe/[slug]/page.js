@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function RecipeDetailPage() {
   const [recipe, setRecipe] = useState(null);
@@ -72,7 +71,6 @@ export default function RecipeDetailPage() {
 
   const handleDelete = async () => {
     if (deleting) return;
-    // Simple browser confirm to avoid accidental deletes
     if (typeof window !== 'undefined' && !window.confirm('Delete this recipe permanently?')) {
       return;
     }
@@ -108,7 +106,6 @@ export default function RecipeDetailPage() {
         return;
       }
 
-      // On successful delete, go back to main recipes page
       router.push('/');
     } catch (err) {
       setError('Failed to delete recipe');
@@ -119,7 +116,6 @@ export default function RecipeDetailPage() {
 
   const handleEditToggle = () => {
     if (!recipe) return;
-    // Reset form to latest recipe values every time edit starts
     if (!isEditing) {
       setForm({
         title: recipe.title || '',
@@ -186,7 +182,6 @@ export default function RecipeDetailPage() {
       setIsEditing(false);
       setSuccessMessage('Recipe updated successfully.');
 
-      // If slug changed on the server, update the URL so future refreshes work
       if (data.slug && data.slug !== slug) {
         router.replace(`/recipe/${data.slug}`);
       }

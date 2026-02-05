@@ -18,7 +18,6 @@ const UserSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Export as a function to avoid Turbopack import issues
 export function getUserModel() {
   return mongoose.models.User || mongoose.model('User', UserSchema);
 }

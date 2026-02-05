@@ -5,7 +5,6 @@ import { generateUniqueSlug } from '@/lib/slugify';
 import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 
-// Helper to build a query that supports either slug or legacy ObjectId
 function buildRecipeQuery(slugOrId, userId) {
   const isObjectId = /^[a-f\d]{24}$/i.test(slugOrId);
   return isObjectId
@@ -13,11 +12,10 @@ function buildRecipeQuery(slugOrId, userId) {
     : { slug: slugOrId, userId };
 }
 
-// GET: Fetch a single recipe by slug (or by _id for old links)
 export async function GET(req, { params }) {
   try {
     await dbConnect();
-    getUserModel(); // register User so Recipe.populate('userId') can resolve ref
+    getUserModel();
     const Recipe = getRecipeModel();
 
     const authHeader = req.headers.get('authorization');
@@ -48,7 +46,6 @@ export async function GET(req, { params }) {
   }
 }
 
-// PUT: Update an existing recipe (title/category/ingredients/instructions)
 export async function PUT(req, { params }) {
   try {
     await dbConnect();
@@ -77,7 +74,6 @@ export async function PUT(req, { params }) {
       return NextResponse.json({ message: 'Recipe not found' }, { status: 404 });
     }
 
-    // If title changes, generate a new unique slug for this user
     let newSlug = recipe.slug;
     if (title !== recipe.title) {
       newSlug = await generateUniqueSlug(Recipe, title, decoded.userId, recipe._id);
@@ -103,7 +99,6 @@ export async function PUT(req, { params }) {
   }
 }
 
-// DELETE: Remove a recipe owned by the current user
 export async function DELETE(req, { params }) {
   try {
     await dbConnect();

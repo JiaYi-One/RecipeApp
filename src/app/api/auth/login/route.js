@@ -10,19 +10,15 @@ export async function POST(req) {
     const { email, password } = await req.json();
     const User = getUserModel();
     
-    // 1. Find user by email
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
-    // 2. Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
-
-    // 3. Create JWT token (30 days = stay logged in across dev restarts / browser sessions)
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,

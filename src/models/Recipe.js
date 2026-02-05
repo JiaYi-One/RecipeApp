@@ -31,10 +31,8 @@ const RecipeSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Per-user unique slug: same slug allowed for different users
 RecipeSchema.index({ userId: 1, slug: 1 }, { unique: true });
 
-// Export as a function to avoid Turbopack import issues
 export function getRecipeModel() {
   return mongoose.models.Recipe || mongoose.model('Recipe', RecipeSchema);
 }

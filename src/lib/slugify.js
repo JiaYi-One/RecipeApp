@@ -1,12 +1,10 @@
-// Convert text to URL-friendly slug
 export function createSlug(text) {
   return text
     .toLowerCase()
-    .replace(/[^\w ]+/g, '')  // Remove special characters
-    .replace(/ +/g, '-');     // Replace spaces with dashes
+    .replace(/[^\w ]+/g, '')
+    .replace(/ +/g, '-');
 }
 
-// Generate slug unique per user: "Matcha Latte" → matcha-latte, then matcha-latte-1, matcha-latte-2
 export async function generateUniqueSlug(Recipe, title, userId, excludeId = null) {
   const baseSlug = createSlug(title);
   const escaped = baseSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

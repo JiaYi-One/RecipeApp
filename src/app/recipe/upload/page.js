@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function UploadRecipe() {
   const [categoryType, setCategoryType] = useState('default');
@@ -17,7 +16,6 @@ export default function UploadRecipe() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/login');
@@ -29,7 +27,6 @@ export default function UploadRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Convert ingredients from string to array
     const ingredientsArray = recipe.ingredients
       .split('\n')
       .map(i => i.trim())

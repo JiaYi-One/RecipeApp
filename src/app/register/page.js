@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -30,11 +29,10 @@ export default function RegisterPage() {
     <div className="container mt-5">
       <div className="row justify-content-center">
         <div className="col-md-6 card p-4 shadow">
-          <h2 className="text-center mb-4">Join MyRecipeDairy</h2>
+          <h2 className="text-center mb-4">Join My Recipe</h2>
           {message && (
             <div className={`alert ${success ? 'alert-success' : 'alert-danger'}`}>
               {message}
-              {success }
             </div>
           )}
           <form onSubmit={handleSubmit}>

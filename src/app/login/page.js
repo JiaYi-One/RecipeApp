@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -10,7 +9,6 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // If already logged in, redirect to home
     const token = localStorage.getItem('token');
     if (token) {
       router.push('/');
@@ -28,14 +26,11 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (res.ok) {
-      // Store the JWT token in LocalStorage so the browser remembers you
       localStorage.setItem('token', data.token);
-      setMessage('Login Successful! Redirecting...');
-      
-      // Redirect to your dashboard or home page after 2 seconds
+      //setMessage('Login Successful! Redirecting...');
       setTimeout(() => {
         router.push('/'); 
-      }, 2000);
+      }, 1000);
     } else {
       setMessage(data.message || 'Login failed');
     }
@@ -45,7 +40,7 @@ export default function LoginPage() {
     <div className="container mt-5">
       <div className="row justify-content-center">
         <div className="col-md-5 card p-4 shadow">
-          <h2 className="text-center mb-4">Login to MyRecipeDairy</h2>
+          <h2 className="text-center mb-4">Login to My Recipe</h2>
           {message && (
             <div className={`alert ${message.includes('Successful') ? 'alert-success' : 'alert-danger'}`}>
               {message}
