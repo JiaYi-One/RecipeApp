@@ -31,6 +31,29 @@ export default function RecipeDetailPage() {
     }
     if (!slug) return;
 
+    const allRecipesData = sessionStorage.getItem('allRecipes');
+    if (allRecipesData) {
+      try {
+        const allRecipes = JSON.parse(allRecipesData);
+        const cached = allRecipes.find(r => r.slug === slug || r._id === slug);
+        if (cached) {
+          setRecipe(cached);
+          setForm({
+            title: cached.title || '',
+            category: cached.category || '',
+            ingredientsText: Array.isArray(cached.ingredients)
+              ? cached.ingredients.join('\n')
+              : '',
+            instructions: cached.instructions || '',
+          });
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
+    }
+
     const fetchRecipe = async () => {
       try {
         const res = await fetch(`/api/recipe/${slug}`, {
@@ -184,6 +207,17 @@ export default function RecipeDetailPage() {
       setRecipe(data);
       setIsEditing(false);
       setSuccessMessage('Recipe updated successfully.');
+
+      const allRecipesData = sessionStorage.getItem('allRecipes');
+      if (allRecipesData) {
+        try {
+          const allRecipes = JSON.parse(allRecipesData);
+          const updatedRecipes = allRecipes.map(r => r._id === data._id ? data : r);
+          sessionStorage.setItem('allRecipes', JSON.stringify(updatedRecipes));
+        } catch (e) {
+          sessionStorage.removeItem('allRecipes');
+        }
+      }
 
       if (data.slug && data.slug !== slug) {
         router.replace(`/recipe/${data.slug}`);
